@@ -87,6 +87,7 @@ void hill_climbing::operator()(deme_t& deme,
 
     // Needed for correlated neighborhood exploration.
     instance prev_center = center_inst;
+    auto specs = fields.contin();
     size_t prev_start = 0;
     size_t prev_size = 0;
 
@@ -265,7 +266,8 @@ void hill_climbing::operator()(deme_t& deme,
 
         // Make a copy of the best instance.
         if (has_improved) {
-            center_inst = deme[ibest].first;
+            update_center_and_spec(center_inst._contin,
+                deme[ibest].first._contin, specs, fields.contin());
             already_xover = false;
         }
 
@@ -809,6 +811,19 @@ bool hill_climbing::resize_deme(deme_t& deme, score_t best_score)
         did_resize = true;
     }
     return did_resize;
+}
+
+void hill_climbing::update_center_and_spec(contin_vec& cinst, const contin_vec& new_inst,
+        std::vector<field_set::contin_spec>& old_specs, const std::vector<field_set::contin_spec>& new_specs){
+    for(int idx = 0; idx < new_inst.size(); ++idx)
+        if(cinst[idx] != new_inst[idx]){
+            new_specs[idx]._exp = new_inst[idx] - cinst[idx];
+            new_specs[idx].next_exp();
+            old_specs[idx]._exp = new_specs[idx]._exp;
+            cinst[idx] = new_inst[idx];
+        }
+        else
+            new_specs[idx]._exp = old_specs[idx]._exp;
 }
 
 void hill_climbing::log_stats_legend()

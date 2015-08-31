@@ -837,6 +837,9 @@ bool hybrid_hc_ps::optimize_contin(deme_t& deme, size_t& num_new_inst,
     //
     combo_tree tr = cb_scorer._rep.get_candidate(
                 inst, cb_scorer._reduce);
+    //for(auto it = tr.begin(); it != tr.end(); ++it)
+    //    if(it.node.data.which() == 0)
+
     contin_vec bglobal = inst._contin;
     score_t score;
     bool has_improved = false;

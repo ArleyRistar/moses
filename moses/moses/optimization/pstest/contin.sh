@@ -3,8 +3,8 @@ make -j4 -C ../../../../build/
 
 MOSES="../../../../build/moses/moses/main/moses"
 FOLDER="-i ../../../../examples/example-data"
-ALGO="-a hb -l DEBUG --contin-depth 1"
-GDB="gdb -ex \"break hybrid-hc-ps.cc:115\" -ex \"run\" -args "
+ALGO="-a hb -l DEBUG --contin-depth 2"
+GDB="gdb -ex \"break hybrid-hc-ps.cc:843\" -ex \"run\" -args "
 
 #eval $GDB \
 #valgrind --tool=massif \
@@ -13,8 +13,8 @@ GDB="gdb -ex \"break hybrid-hc-ps.cc:115\" -ex \"run\" -args "
 
 # Predicates all
 #valgrind --tool=callgrind \
-#eval $GDB \
-time $MOSES -H it $FOLDER/predicates.csv -W1 -u pred -m1000 $ALGO
+eval $GDB \
+$MOSES -H it $FOLDER/predicates.csv -W1 -u pred -m2000 $ALGO
 
 # Iris
 #$MOSES $FOLDER/iris.data -u class -n sin -n log -n exp -n div -m2000 $ALGO

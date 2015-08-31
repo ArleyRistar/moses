@@ -31,19 +31,19 @@ void generate_contin_neighbor(const field_set& fs,
                               unsigned dist,
                               opencog::RandGen& rng)
 {
-    if(dist < 0)
+    if(dist <= 0)
         return;
     contin_t expansion = it.spec().next_exp();
     *it += expansion;
-    dist--;
+    //dist--;
 
-    dorepeat(dist){
-        if(expansion > 0)
-            expansion /= 2;
-        else
-            expansion *= -1;
-        *it += expansion;
-    }
+    //dorepeat(dist){
+    //    if(expansion > 0)
+    //        expansion /= 2;
+    //    else
+    //        expansion *= -1;
+    //    *it += expansion;
+    //}
 }
 
 // See header for comment
