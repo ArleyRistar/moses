@@ -82,6 +82,7 @@ struct complexity_based_scorer : public iscorer_base
 
         try {
             combo_tree tr = _rep.get_candidate(inst, _reduce);
+            //logger().debug() << "\ntest: " << tr << "   " << _rep.fields().to_string(inst);
             return _cscorer.get_cscore(tr);
         } catch (...) {
 // XXX FIXME, calling score_tree above does not throw the exception; this should be done

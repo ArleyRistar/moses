@@ -834,11 +834,36 @@ bool hybrid_hc_ps::resize_deme(deme_t& deme, score_t best_score)
 bool hybrid_hc_ps::optimize_contin(deme_t& deme, size_t& num_new_inst,
             size_t distance, const complexity_based_scorer& cb_scorer,
             instance& inst, std::vector<particle>& parts, score_t& bscore){
-    //
+    inst._contin = parts[0].values;
+    // Transform to combo tree and reduce it
     combo_tree tr = cb_scorer._rep.get_candidate(
                 inst, cb_scorer._reduce);
-    //for(auto it = tr.begin(); it != tr.end(); ++it)
-    //    if(it.node.data.which() == 0)
+    // Get the reference to the vector with the central contins
+    // Their addresses will be used to change the combo tree.
+    contin_vec& contins = inst._contin;
+    // Map the indexs of the used contins
+    std::vector<unsigned> map_contin;
+    // For each vertex in the tree (doesn't matter the access order)
+    // Check if the vertex is a contin, if it is
+    // For each address in the contin part of the instance
+    for(auto it = tr.begin(); it != tr.end(); ++it)
+        if(it.node->data.which() == 0) {
+            boost::detail::variant::known_get<double&> getter;
+            contin_t& contin_add = it.node->data.apply_visitor(getter);
+            OC_ASSERT(contins[49] == contin_add, "There must be a bug");
+            for(unsigned idx; idx < contins.size(); ++idx);
+            break;
+        }
+    contins[49] = 1.11111;
+    cb_scorer._cscorer.get_cscore(tr);
+    for(auto it = tr.begin(); it != tr.end(); ++it)
+        if(it.node->data.which() == 0) {
+            boost::detail::variant::known_get<double&> getter;
+            contin_t& contin_add = it.node->data.apply_visitor(getter);
+            OC_ASSERT(contins[49] == contin_add, "There must be a bug");
+            for(unsigned idx; idx < contins.size(); ++idx);
+            break;
+        }
 
     contin_vec bglobal = inst._contin;
     score_t score;
@@ -847,7 +872,7 @@ bool hybrid_hc_ps::optimize_contin(deme_t& deme, size_t& num_new_inst,
     dorepeat(distance) {
         for(auto it = parts.begin(); it!= parts.end(); ++it){
             particle& tmp_part = *it;
-            inst._contin = tmp_part.values;
+            contins = tmp_part.values;
             composite_score cscore = cb_scorer._cscorer.
                     get_cscore(tr);
             score = cscore.get_penalized_score();
@@ -866,7 +891,7 @@ bool hybrid_hc_ps::optimize_contin(deme_t& deme, size_t& num_new_inst,
             }
         }
 
-        inst._contin = bglobal;
+        contins = bglobal;
         update_particles(parts, bglobal);
     }
 

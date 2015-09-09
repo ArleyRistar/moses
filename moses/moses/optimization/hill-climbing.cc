@@ -75,6 +75,12 @@ void hill_climbing::operator()(deme_t& deme,
     // center_inst is the current location on the hill.
     // Copy it, don't reference it, since sorting will mess up a ref.
     instance center_inst(init_inst);
+    // The contin_spec has a initial contin offset that
+    // was to be applied to the center instance.
+    contin_vec& cv = center_inst._contin;
+    std::transform (cv.begin(), cv.end(), fields.contin().begin(), cv.begin(),
+            [](contin_t& i, const field_set::contin_spec& s)
+            { return i + s.get_start(); });
     composite_score best_cscore = worst_composite_score;
     score_t best_score = very_worst_score;
     score_t best_raw_score = very_worst_score;
@@ -87,7 +93,6 @@ void hill_climbing::operator()(deme_t& deme,
 
     // Needed for correlated neighborhood exploration.
     instance prev_center = center_inst;
-    auto specs = fields.contin();
     size_t prev_start = 0;
     size_t prev_size = 0;
 
@@ -266,8 +271,7 @@ void hill_climbing::operator()(deme_t& deme,
 
         // Make a copy of the best instance.
         if (has_improved) {
-            update_center_and_spec(center_inst._contin,
-                deme[ibest].first._contin, specs, fields.contin());
+            center_inst = deme[ibest].first;
             already_xover = false;
         }
 
@@ -811,19 +815,6 @@ bool hill_climbing::resize_deme(deme_t& deme, score_t best_score)
         did_resize = true;
     }
     return did_resize;
-}
-
-void hill_climbing::update_center_and_spec(contin_vec& cinst, const contin_vec& new_inst,
-        std::vector<field_set::contin_spec>& old_specs, const std::vector<field_set::contin_spec>& new_specs){
-    for(int idx = 0; idx < new_inst.size(); ++idx)
-        if(cinst[idx] != new_inst[idx]){
-            new_specs[idx]._exp = new_inst[idx] - cinst[idx];
-            new_specs[idx].next_exp();
-            old_specs[idx]._exp = new_specs[idx]._exp;
-            cinst[idx] = new_inst[idx];
-        }
-        else
-            new_specs[idx]._exp = old_specs[idx]._exp;
 }
 
 void hill_climbing::log_stats_legend()

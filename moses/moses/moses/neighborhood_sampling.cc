@@ -33,7 +33,7 @@ void generate_contin_neighbor(const field_set& fs,
 {
     if(dist <= 0)
         return;
-    contin_t expansion = it.spec().next_exp();
+    contin_t expansion = ((rng.randbool())?-1:1) * rng.randdouble() * it.spec()._exp;
     *it += expansion;
     //dist--;
 

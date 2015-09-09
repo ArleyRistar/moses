@@ -162,8 +162,10 @@ struct field_set
 
     struct contin_spec
     {
-        contin_spec(contin_t c) : _exp(c) { } // exp == expansion factor
+        contin_spec(contin_t ex, depth_t d) : _exp(ex), _dep(d) { } // exp == expansion factor
         mutable contin_t _exp;
+        mutable depth_t _dep;
+
         bool operator<(const contin_spec& rhs) const { //sort descending by multy
             return _exp > rhs._exp;
         }
@@ -172,18 +174,12 @@ struct field_set
             return _exp == rhs._exp;
         }
 
-        contin_t get_exp() const {
-            return _exp;
+        contin_t get_start() const {
+            contin_t exp = _exp;
+            _exp = pow2(_dep - 1);
+            return exp;
         }
 
-        contin_t next_exp() const {
-            contin_t pexp = _exp;
-            if(_exp < 0)
-                _exp /= -2;
-            else
-                _exp = -_exp;
-            return pexp;
-        }
     };
 
     /**

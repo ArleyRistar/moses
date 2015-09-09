@@ -33,8 +33,8 @@ namespace opencog { namespace moses {
 /////////////////
 
 contin_knob::contin_knob(combo_tree& tr, combo_tree::iterator tgt,
-                            contin_t expansion)
-    : knob_base(tr, tgt), _spec(expansion) { }
+                         field_set::width_t depth)
+    : knob_base(tr, tgt), _spec(combo::get_contin(*tgt), depth) { }
 
 bool contin_knob::in_exemplar() const
 {

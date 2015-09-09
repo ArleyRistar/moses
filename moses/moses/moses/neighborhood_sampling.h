@@ -273,9 +273,11 @@ Out vary_n_knobs(const field_set& fs,
             contin_t tmpc = *itc;
             auto& spec = *itspec;
 
-            *itc = tmpc + spec.next_exp();
+            //*itc = tmpc + spec.next_exp();
+            *itc = 2;
             out = vary_n_knobs(fs, tmp_inst, dist - 1, starting_index, out, end);
-            *itc = tmpc + spec.next_exp();
+            //*itc = tmpc + spec.next_exp();
+            *itc = -2;
             out = vary_n_knobs(fs, tmp_inst, dist - 1, starting_index, out, end);
 
             *itc = tmpc;

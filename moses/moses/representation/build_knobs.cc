@@ -780,7 +780,7 @@ void build_knobs::build_contin(pre_it it)
             // field spec for the knob. This field spec is not yet a
             // part of any field set; this happens later, when the
             // representation is built.
-            contin_knob kb(_exemplar, it, pow2(_depth - 1));
+            contin_knob kb(_exemplar, it, _depth);
             _rep.contin.insert(make_pair(kb.spec(), kb));
         }
     }
