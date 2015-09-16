@@ -173,8 +173,8 @@ std::ostream& field_set::ostream_field_set(std::ostream& out) const
     {
         out << "\t{ idx=" << idx
             << "; type=contin"
-            << "; expansion=" << cit->_exp
-            << "; depth=" << cit->_dep
+            << "; space=" << cit->_space
+            << "; total_space=" << cit->_tspc
             << "; }," << endl;
     }
 

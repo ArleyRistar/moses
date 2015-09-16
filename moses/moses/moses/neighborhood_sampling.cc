@@ -33,17 +33,7 @@ void generate_contin_neighbor(const field_set& fs,
 {
     if(dist <= 0)
         return;
-    contin_t expansion = ((rng.randbool())?-1:1) * rng.randdouble() * it.spec()._exp;
-    *it += expansion;
-    //dist--;
-
-    //dorepeat(dist){
-    //    if(expansion > 0)
-    //        expansion /= 2;
-    //    else
-    //        expansion *= -1;
-    //    *it += expansion;
-    //}
+    *it = it.spec().get_new(*it, dist, rng);
 }
 
 // See header for comment
@@ -172,7 +162,8 @@ size_t sample_new_instances(size_t total_number_of_neighbours,
                             size_t current_number_of_instances,
                             const instance& center_inst,
                             instance_set<composite_score>& deme,
-                            unsigned dist)
+                            unsigned dist,
+                            marker_vec& changed_contin)
 {
     // We assume that the total number of neighbors was just an estimate.
     // If the number of requested new instances is even close to the
@@ -194,7 +185,9 @@ size_t sample_new_instances(size_t total_number_of_neighbours,
                                  number_of_new_instances,
                                  deme.begin() + current_number_of_instances,
                                  deme.end(),
-                                 center_inst);
+                                 center_inst,
+                                 changed_contin,
+                                 current_number_of_instances);
     } else {
         number_of_new_instances = total_number_of_neighbours;
         // Resize the deme so it can take new instances
@@ -225,6 +218,21 @@ size_t sample_new_instances(size_t number_of_new_instances,
                                 number_of_new_instances,
                                 current_number_of_instances,
                                 center_inst, deme, dist);
+}
+
+size_t sample_new_instances(size_t total_number_of_neighbours,
+                            size_t number_of_new_instances,
+                            size_t current_number_of_instances,
+                            const instance& center_inst,
+                            instance_set<composite_score>& deme,
+                            unsigned dist)
+{
+    marker_vec changed_contin(0);
+    return sample_new_instances(total_number_of_neighbours,
+                                number_of_new_instances,
+                                current_number_of_instances,
+                                center_inst, deme, dist, changed_contin);
+
 }
 
 } // ~namespace moses

@@ -31,6 +31,7 @@
 
 #include <opencog/util/oc_assert.h>
 
+#include "../moses/neighborhood_sampling.h"
 #include "../representation/instance_set.h"
 #include "optimization.h"
 
@@ -254,6 +255,9 @@ protected:
 
     bool resize_deme(deme_t& deme, score_t score_cutoff);
     size_t resize_by_score(deme_t& deme, score_t score_cutoff);
+
+    void update_contin_spec(marker_vec& mkv,
+        deme_t& deme, score_t prev_hi, unsigned best_idx);
 
 public:
     /**

@@ -115,10 +115,14 @@ void generate_contin_neighbor(const field_set& fs,
  *                      bounds.  If it does, an assert is raised.
  * @param center_inst   the center instance
  */
+// Type to mark which knobs is being changed.
+typedef std::vector<std::vector<unsigned>> marker_vec;
 template<typename Out>
 void sample_from_neighborhood(const field_set& fs, unsigned dist,
                               unsigned sample_size, Out out, Out end,
-                              const instance & center_inst)
+                              const instance & center_inst,
+                              marker_vec& changed_contin,
+                              unsigned current_number_of_instances)
 {
     OC_ASSERT(center_inst._bit_disc.size() == fs.packed_width(),
               "Please make sure that the center_inst"
@@ -155,9 +159,12 @@ void sample_from_neighborhood(const field_set& fs, unsigned dist,
                 i++;
             // modify contin
             } else if ( r >= (fs.n_bits() + fs.n_disc_fields())) {
-                field_set::contin_iterator itc = fs.begin_contin(new_inst);
                 //cout << "i = " << i << "  r = " << r << endl;
-                itc += r - fs.n_bits() - fs.n_disc_fields();
+                unsigned cidx = r - fs.n_bits() - fs.n_disc_fields();
+                field_set::contin_iterator itc = fs.begin_contin(new_inst) + cidx;
+
+                if(!changed_contin.empty())
+                    changed_contin[cidx].push_back(current_number_of_instances);
                 // @todo: now the distance is 1, choose the distance
                 // of contin possibly different than 1
                 generate_contin_neighbor(fs, new_inst, itc, 1);
@@ -165,6 +172,7 @@ void sample_from_neighborhood(const field_set& fs, unsigned dist,
             }
         }
         OC_ASSERT(out != end); // to avoid invalid memory write
+        current_number_of_instances++;
         *out++ = new_inst;
         // cout << "********** Added instance:" << fs.to_string(new_inst) << endl;
     }
@@ -487,6 +495,13 @@ size_t sample_new_instances(size_t number_of_new_instances,
                             instance_set<composite_score>& deme,
                             unsigned dist);
 
+size_t sample_new_instances(size_t total_number_of_neighbours,
+                            size_t number_of_new_instances,
+                            size_t current_number_of_instances,
+                            const instance& center_inst,
+                            instance_set<composite_score>& deme,
+                            unsigned dist,
+                            marker_vec& changed_contin);
 } // ~namespace moses
 } // ~namespace opencog
 

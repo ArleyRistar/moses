@@ -162,22 +162,60 @@ struct field_set
 
     struct contin_spec
     {
-        contin_spec(contin_t ex, depth_t d) : _exp(ex), _dep(d) { } // exp == expansion factor
-        mutable contin_t _exp;
-        mutable depth_t _dep;
+        contin_spec(contin_t start_value, depth_t d)
+            : _space(start_value) {
+            _tspc = pow2(d);
+        }
+        mutable contin_t _space, // Current space to search
+                         _tspc; // Total space to search
+        mutable std::vector<contin_t> _likely;
 
         bool operator<(const contin_spec& rhs) const { //sort descending by multy
-            return _exp > rhs._exp;
+            return _space > rhs._space;
         }
 
         bool operator==(const contin_spec& rhs) const { //don't know why this is needed
-            return _exp == rhs._exp;
+            return _space == rhs._space;
         }
 
         contin_t get_start() const {
-            contin_t exp = _exp;
-            _exp = pow2(_dep - 1);
-            return exp;
+            contin_t start_value = _space;
+            _space = _tspc;
+            return start_value;
+        }
+
+        contin_t get_new(const contin_t& current,
+                unsigned dist, opencog::RandGen& rng) const {
+            contin_t ret;
+            if(_likely.empty()) // || rng.randdouble() < 0.1)
+                // XXX Test a chaotic approach 10% of random above
+                // XXX Test random restart at dist > 1
+                //if(dist > 1)
+                //    ret = rand_at_space(_tspc, rng);
+                //else
+                //    ret = rand_at_space(_space, rng);
+                ret = rand_at_space(_space * dist, rng);
+            else {
+                ret = _likely.back();
+                _likely.pop_back();
+            }
+            return ret;
+        }
+
+        static contin_t rand_at_space(const contin_t& space,
+                opencog::RandGen& rng = randGen()){
+            return rng.randdouble() * rng.randPositiveNegative() * space;
+        }
+
+        void compress() const {
+            // XXX Test gradient descent
+            _likely.clear();
+            _space /= 2;
+        }
+
+        void set_likely(contin_t value) const {
+            // XXX Test order likely by score
+             _likely.push_back(value);
         }
 
     };

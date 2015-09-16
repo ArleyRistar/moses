@@ -33,8 +33,6 @@
 
 #include <opencog/util/oc_omp.h>
 
-#include "../moses/neighborhood_sampling.h"
-
 #include "hill-climbing.h"
 
 namespace opencog { namespace moses {
@@ -81,6 +79,12 @@ void hill_climbing::operator()(deme_t& deme,
     std::transform (cv.begin(), cv.end(), fields.contin().begin(), cv.begin(),
             [](contin_t& i, const field_set::contin_spec& s)
             { return i + s.get_start(); });
+
+    // Create a array of vectos to save what contins are been changed
+    marker_vec changed_contin(fields.n_contin_fields(),
+                            std::vector<unsigned>());
+
+    // Get best scores.
     composite_score best_cscore = worst_composite_score;
     score_t best_score = very_worst_score;
     score_t best_raw_score = very_worst_score;
@@ -198,7 +202,8 @@ void hill_climbing::operator()(deme_t& deme,
                 sample_new_instances(total_number_of_neighbors,
                                      number_of_new_instances,
                                      current_number_of_instances,
-                                     center_inst, deme, distance);
+                                     center_inst, deme, distance,
+                                     changed_contin);
         }
         prev_start = current_number_of_instances;
         prev_size = number_of_new_instances;
@@ -272,6 +277,7 @@ void hill_climbing::operator()(deme_t& deme,
         // Make a copy of the best instance.
         if (has_improved) {
             center_inst = deme[ibest].first;
+            update_contin_spec(changed_contin, deme, prev_hi, ibest);
             already_xover = false;
         }
 
@@ -815,6 +821,27 @@ bool hill_climbing::resize_deme(deme_t& deme, score_t best_score)
         did_resize = true;
     }
     return did_resize;
+}
+
+void hill_climbing::update_contin_spec(marker_vec& changed_contin, deme_t& deme,
+        score_t prev_hi, unsigned best_idx){
+    const std::vector<field_set::contin_spec>&
+            specs = deme.fields().contin();
+    //sidx == index of contin_spec
+    for(unsigned sidx = 0;
+            sidx < changed_contin.size(); ++sidx){
+        // iidx == index of instance
+        for(unsigned iidx : changed_contin[sidx]){
+            if(best_idx == iidx){
+                specs[sidx].compress();
+                break;
+            }
+            else if(deme[iidx].second.get_score() > prev_hi)
+                specs[sidx].set_likely(
+                        deme[iidx].first._contin[sidx]);
+        }
+        changed_contin[sidx].clear();
+    }
 }
 
 void hill_climbing::log_stats_legend()
